@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AIB-C01 学習ノート</title>
+<style>
+:root{
+  --bg:#0f1720; --card:#17212c; --card2:#1d2937; --line:#2b3a4a;
+  --tx:#e6edf3; --sub:#9fb0c0; --acc:#ff9900; --acc2:#4aa3ff;
+  --ok:#3fb950; --ng:#f85149; --warn:#d29922;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);
+  font:16px/1.8 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  padding:0 0 env(safe-area-inset-bottom)}
+.wrap{max-width:800px;margin:0 auto;padding:20px 16px 90px}
+h1{font-size:32px;line-height:1.35;margin:10px 0 8px}
+h2{font-size:24px;line-height:1.4;margin:48px 0 14px;padding:12px 14px;
+  background:var(--card2);border-left:5px solid var(--acc);scroll-margin-top:64px}
+h3{font-size:20px;margin:28px 0 10px;color:var(--acc2)}
+h4{font-size:18px;margin:20px 0 8px;color:var(--tx)}
+p,li{font-size:16px}
+.lead{color:var(--sub);font-size:15px;margin:0 0 18px}
+nav{position:sticky;top:0;z-index:9;background:rgba(15,23,32,.97);
+  padding:9px 0;border-bottom:1px solid var(--line);
+  display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;font-size:14px;text-decoration:none;color:var(--tx);
+  background:var(--card);border:1px solid var(--line);padding:6px 12px}
+nav a:first-child{margin-left:16px} nav a:last-child{margin-right:16px}
+.card{background:var(--card);border:1px solid var(--line);
+  padding:14px 16px;margin:16px 0}
+.card.warnbox{border-left:4px solid var(--warn)}
+.card.okbox{border-left:4px solid var(--ok)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:15px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:var(--card2);color:var(--sub);font-weight:600;white-space:nowrap}
+code{background:#0b1218;padding:1px 5px;font-size:15px;color:var(--acc)}
+.w{display:inline-block;background:#3a2a10;color:var(--acc);
+  padding:0 6px;font-size:15px;font-weight:600}
+.tag{display:inline-block;font-size:14px;background:var(--card2);color:var(--sub);
+  border:1px solid var(--line);padding:1px 7px;margin-right:6px}
+.pct{float:right;font-size:15px;color:var(--sub);font-weight:400}
+details{background:var(--card2);border:1px solid var(--line);
+  padding:11px 14px;margin:12px 0}
+details summary{cursor:pointer;font-size:16px;color:var(--acc2);font-weight:600}
+details[open] summary{margin-bottom:10px}
+ul{padding-left:1.3em;margin:10px 0} li{margin:5px 0}
+.kv{margin:7px 0} .kv b{color:var(--acc)}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.foot{color:var(--sub);font-size:15px;margin-top:40px}
+a.src{color:var(--acc2)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html">← ドリル</a>
+  <a href="#top">概要</a><a href="#kata">解き方の型</a>
+  <a href="#d1">D1 基礎24%</a><a href="#d2">D2 戦略28%</a>
+  <a href="#d3">D3 統治24%</a><a href="#d4">D4 変革24%</a>
+  <a href="#aws">AWS範囲</a><a href="#kime">決め手1語</a><a href="#out">範囲外</a>
+</nav>
+<div class="wrap">
+
+<h1 id="top">AWS Certified AI Business Strategist (AIB-C01) 学習ノート</h1>
+<p class="lead">公式試験ガイドの4ドメイン・Task・Skillを日本語で整理。用語の正体と「どっちを選ぶかの判断軸」に寄せてある。</p>
+
+<div class="card">
+<div class="kv"><b>性格</b>：AIを作る人でなく、評価・推進・拡大する人の試験。コード・AWS実装経験は不要。</div>
+<div class="kv"><b>時間・合格</b>：130分／100〜1000スケールで<b>700</b>。補償方式（ドメイン別の足切りなし）。</div>
+<div class="kv"><b>形式</b>：択一（正解1・誤り3）と複数選択（5択以上から2つ以上・全部当てて初めて得点）。未回答は不正解、当て勘に減点なし＝空欄を残さない。</div>
+<div class="kv"><b>配分</b>：D1 基礎24% / <b>D2 戦略28%（最大）</b> / D3 統治24% / D4 変革24%。</div>
+<div class="kv"><b>前提</b>：AI導入チームと並走6か月程度。Bedrock / SageMaker AI / Amazon Quick を「高レベルで何をする物か」だけ知っていればよい。</div>
+</div>
+
+<h2 id="kata">この試験の解き方の型 <span class="pct">SAA・DEAとの違い</span></h2>
+
+<div class="card warnbox">
+<h4>SAAのクセを持ち込むと落ちる</h4>
+<ul>
+<li><b>サービス名を選ぶ問題がほぼ無い</b>。「どのAWSサービスか」でなく「どの<em>経営判断</em>か」を選ぶ。選択肢に技術実装（インスタンス選定・パイプライン構成）が出たら、それは範囲外＝罠。</li>
+<li><b>「立派な言葉」が誤答になる構造は同じ</b>。ファインチューニング・独自モデル構築・全社一斉展開は、要件を読むと過剰になっていることが多い。</li>
+<li><b>「AIを使わない」が正解の問題が必ずある</b>（Skill 2.1.4・1.2.1）。規則が明確で例外が少ない業務はルールベース自動化が正解。</li>
+</ul>
+</div>
+
+<div class="card okbox">
+<h4>正解を決める3つの読み方</h4>
+<ol>
+<li><b>最後の1行の要件語で切る</b>：「まず最初にすべきことは」「最も可能性が高いのは」「最小の労力で」「経営層に示すには」。同じ状況でも聞き方で答えが変わる。</li>
+<li><b>順番を問う問題は「測る前・測った後」で切る</b>：基準線（ベースライン）取得 → 導入 → 効果測定。「先に何をするか」なら基準線・データ準備・責任の明確化が先。</li>
+<li><b>ガバナンスは「後付けでなく設計時」が常に正しい</b>（governance by design）。「本番後に監視を入れる」系は誤答。</li>
+</ol>
+</div>
+
+<details>
+<summary>複数選択の潰し方</summary>
+<p>2つ選ぶ問題は「軸が違う2つ」が正解になりやすい。同じ軸の似た選択肢が2つ並んでいたら、片方はニアミスの誤答。<b>人・プロセス・技術・ガバナンス</b>の4軸を思い出して、別軸から1つずつ取る。</p>
+</details>
+
+<h2 id="d1">D1 AIの基礎とリテラシー <span class="pct">24%</span></h2>
+<p class="lead">Task 1.1 用語 / 1.2 ソリューション型の選択 / 1.3 生成AIの技法</p>
+
+<h3>Task 1.1 中核概念と用語</h3>
+
+<table>
+<tr><th>用語</th><th>正体（1文）</th><th>試験での出方</th></tr>
+<tr><td>アルゴリズム</td><td>データから規則を見つける手順そのもの</td><td>モデルと混同させる</td></tr>
+<tr><td>モデル</td><td>学習の結果できた「予測する物」＝成果物</td><td>—</td></tr>
+<tr><td>学習（training）</td><td>過去データを食わせてモデルを作る工程。時間と費用がかかる</td><td>コストが乗るのはここ</td></tr>
+<tr><td>推論（inference）</td><td>できたモデルに新しいデータを入れて答えを出す工程</td><td>使うほど課金＝運用費の主役</td></tr>
+<tr><td>予測（prediction）</td><td>推論の出力。確率的で、常に外れる余地がある</td><td>「100%正しい」は誤答</td></tr>
+<tr><td>AI</td><td>人の判断を機械にさせる分野全体（ルールベースも含む上位概念）</td><td>3者の包含関係を問う</td></tr>
+<tr><td>ML（機械学習）</td><td>AIの一部。データから規則を学ぶ方式</td><td>—</td></tr>
+<tr><td>GenAI（生成AI）</td><td>MLの一部。文章・画像・コードなど新しい内容を作る</td><td>包含は AI ⊃ ML ⊃ GenAI</td></tr>
+<tr><td>構造化データ</td><td>表・列で並ぶデータ（売上・在庫・顧客属性）</td><td>従来型MLが得意</td></tr>
+<tr><td>非構造化データ</td><td>文章・音声・画像・PDF。企業データの大半がこちら</td><td>GenAI・文書抽出の出番</td></tr>
+<tr><td>データ品質</td><td>欠損・偏り・古さ・重複。入力が悪ければ出力も悪い</td><td>導入失敗の第一原因として問われる</td></tr>
+</table>
+
+<div class="card">
+<h4>データ品質が効く理由（Skill 1.1.4 の答え方）</h4>
+<ul>
+<li>モデルは<b>データに含まれる偏りをそのまま学ぶ</b>。過去の不公平な判断を学習すれば、不公平をさらに速く大量に再生産する。</li>
+<li>品質が悪いままアルゴリズムを高度にしても改善しない。<b>「まず何をするか」型の問題ではデータ品質・データ準備が正解</b>になりやすい。</li>
+</ul>
+</div>
+
+<details>
+<summary>国際規格 ISO/IEC 23053 と 42001（Skill 1.1.6）</summary>
+<table>
+<tr><th>規格</th><th>何の規格か</th><th>覚える一言</th></tr>
+<tr><td>ISO/IEC 23053</td><td>MLを使うAIシステムを記述する共通の枠組み・用語</td><td><b>言葉を揃える</b>ための規格</td></tr>
+<tr><td>ISO/IEC 42001</td><td>AIマネジメントシステム（AIMS）の規格。認証を取れる</td><td><b>組織として統治する</b>ための規格</td></tr>
+</table>
+<p>「全社でAIの用語・分類がバラバラ」→23053系の語彙統一。「AIガバナンスを第三者に示したい・認証が欲しい」→42001。</p>
+</details>
+
+<h3>Task 1.2 どのソリューション型を選ぶか</h3>
+
+<div class="card warnbox">
+<h4>AIを使わない判断（Skill 1.2.1）— この試験の頻出</h4>
+<table>
+<tr><th>状況</th><th>正解</th><th>理由</th></tr>
+<tr><td>規則が明文化され例外が少ない（税率計算・与信の閾値判定・承認フロー）</td><td>ルールベース自動化</td><td>結果が説明可能・安価・監査しやすい。AIは過剰</td></tr>
+<tr><td>規則が厳密に守られなければならない（法令の必須項目チェック）</td><td>ルールベース</td><td>確率的な出力は許されない</td></tr>
+<tr><td>入力のパターンが無数（自由記述の問い合わせ分類・画像判定）</td><td>AI/ML</td><td>ルールを書き切れない</td></tr>
+<tr><td>学習データが無い・少ない、または問題の定義が曖昧</td><td>AIを採用しない（Skill 2.1.4）</td><td>作っても価値が出ない</td></tr>
+</table>
+</div>
+
+<h4>AIエージェント（Skill 1.2.2）</h4>
+<p>単発で答えを返すだけのAIと違い、<b>目標を与えると自分で段取りして動く</b>もの。試験で問われる中核能力は4つ。</p>
+<ul>
+<li><b>自律性（autonomy）</b>：次に何をするかを自分で決める</li>
+<li><b>ツール利用（tool use）</b>：検索・社内API・DB照会などを自分で呼ぶ</li>
+<li><b>エージェント間通信（agent-to-agent）</b>：複数のエージェントが役割分担して連携する</li>
+<li><b>オーケストレーション戦略</b>：どの順で誰に任せるかを統括する仕組み</li>
+</ul>
+<p class="lead">経営視点の含意＝自律的に動くほど<b>人の監督点（human oversight）と権限の範囲を先に決める必要が増す</b>。D3と必ず結びつけて出る。</p>
+
+<h4>継続監視とドリフト（Skill 1.2.3）</h4>
+<table>
+<tr><th>用語</th><th>中身</th><th>対処</th></tr>
+<tr><td>モデルドリフト</td><td>現実が変わってモデルの前提がずれ、精度が静かに落ちる</td><td>継続監視・再学習の運用を最初から計画</td></tr>
+<tr><td>データ品質劣化</td><td>入力側の仕様変更・欠損増加で出力が崩れる</td><td>入力の監視も対象に含める</td></tr>
+<tr><td>バイアスドリフト</td><td>運用中に偏りが増大する（Skill 3.3.2）</td><td>公平性の指標を定期測定</td></tr>
+</table>
+<p class="lead"><b>「導入したら終わり」は必ず誤答。</b>AIは導入コストでなく運用コストの物、と覚える。</p>
+
+<h4>シャドーAI（Skill 1.2.4）</h4>
+<p>従業員が会社の承認なく外部AIツールを使う状態。機密漏洩・IP・コンプライアンスのリスク源。</p>
+<p><b>正解の型＝禁止でなく「透明な分類」</b>：承認済み / 禁止 / 評価中 の3分類を公開し、承認済みの使える道を用意する。全面禁止は水面下利用を増やすので誤答になりやすい。</p>
+
+<h3>Task 1.3 生成AIの技法</h3>
+
+<details open>
+<summary>プロンプトエンジニアリングの原則（Skill 1.3.1）</summary>
+<ul>
+<li>役割・文脈・制約・出力形式を明示する（曖昧な指示は曖昧な出力）</li>
+<li>例を見せる（少数例＝few-shot）と精度が上がる</li>
+<li>長い課題は手順に分解して段階的に指示する</li>
+<li>プロンプトで直せるのは「指示の与え方」の問題だけ。<b>知識が足りない問題はプロンプトでは直らない</b>（→RAG）</li>
+</ul>
+</details>
+
+<h4>トークンとコンテキストウィンドウ（Skill 1.3.2）</h4>
+<table>
+<tr><th>用語</th><th>中身</th><th>効いてくる所</th></tr>
+<tr><td>トークン</td><td>モデルが扱う文字のかたまり。入力＋出力の量で課金される</td><td><b>コストの単位</b>（消費ベース課金）</td></tr>
+<tr><td>コンテキストウィンドウ</td><td>一度に渡せる上限。超えると古い部分が落ちる</td><td>長文契約書の一括処理・長い会話の記憶で破れる</td></tr>
+</table>
+<p class="lead">症状の読み方：長い会話で前の指示を忘れる／長文の後半だけ要約が雑になる → コンテキスト上限の問題。費用が想定を超える → トークン量の問題。</p>
+
+<h4>モデル適応の3段階（Skill 1.3.3）— 選択の判断軸</h4>
+<table>
+<tr><th>手法</th><th>何をする</th><th>選ぶ条件</th><th>コスト</th></tr>
+<tr><td>プロンプトエンジニアリング</td><td>指示の書き方を工夫する</td><td>まず最初に試す。汎用知識で足りる</td><td>ほぼ0</td></tr>
+<tr><td><b>RAG</b></td><td>社内文書を検索して根拠として渡す</td><td>社内の最新情報・出典が必要・情報が頻繁に変わる</td><td>低〜中</td></tr>
+<tr><td>ファインチューニング</td><td>モデル自体を追加学習する</td><td>専門用語の語調・独自の出力形式を体に入れたい。<b>教師データが大量にある</b></td><td>高（再学習の度に発生）</td></tr>
+</table>
+<div class="card okbox">
+<b>決め手</b>：「社内規程を根拠付きで答えたい」「情報が毎月変わる」「出典を示したい」→<b>RAG</b>。ここでファインチューニングを選ぶのが典型的な誤答（＝立派な言葉の罠）。逆に「回答の言い回し・形式を自社流に固定したい」はファインチューニング。
+</div>
+
+<h2 id="d2">D2 AI戦略と事業価値の創出 <span class="pct">28%・最大</span></h2>
+<p class="lead">Task 2.1 戦略立案 / 2.2 価値の測定 / 2.3 競争優位</p>
+
+<h3>Task 2.1 事業目標に沿った戦略</h3>
+
+<h4>高インパクトのユースケース（Skill 2.1.1）</h4>
+<table>
+<tr><th>業務機能</th><th>代表ユースケース</th><th>結びつく事業成果</th></tr>
+<tr><td>カスタマーオペレーション</td><td>問い合わせの自動応答・オペレーター支援・要約</td><td>応答時間短縮・処理単価低減・満足度</td></tr>
+<tr><td>営業・マーケティング</td><td>パーソナライズ・コンテンツ生成・リードのスコアリング</td><td>売上増・成約率・制作リードタイム</td></tr>
+<tr><td>研究開発</td><td>候補探索・設計案生成・文献調査</td><td>開発期間短縮・試行回数増</td></tr>
+<tr><td>ソフトウェア開発</td><td>コード生成・レビュー支援・テスト生成</td><td>開発生産性・欠陥率</td></tr>
+</table>
+<p class="lead">答え方の型＝<b>「AIの能力」を書いて終わらせず、必ず測れる事業成果に紐づける</b>。「最新のAIを導入する」は目的でなく手段＝誤答。</p>
+
+<h4>Build / Buy / Partner（Skill 2.1.2）</h4>
+<table>
+<tr><th>選択</th><th>選ぶ条件</th><th>代償</th></tr>
+<tr><td><b>Buy</b>（既製・SaaS・Marketplace）</td><td>短納期・一般的な業務・社内にAI人材がいない・まず試したい</td><td>差別化にならない・カスタマイズに限界</td></tr>
+<tr><td><b>Build</b>（自社構築）</td><td>それ自体が競争優位の源泉・独自データがある・長期に持つ覚悟と人材がある</td><td>費用・期間・運用責任が最大</td></tr>
+<tr><td><b>Partner</b></td><td>能力の不足を補いつつ独自性も要る・規制対応の知見が必要・段階的に内製化したい</td><td>依存・知識移転の設計が必要</td></tr>
+</table>
+<p>判断に入れる要素は<b>予算・期間・自社の能力・ベンダー提案・規制対応</b>の5つ。「一番安いから」「一番高機能だから」の単独理由は誤答。</p>
+
+<h4>優先順位づけと止める判断（Skill 2.1.3）</h4>
+<p>軸は<b>事業価値 × 実現可能性 × 持続可能性 × 戦略適合</b>。結論は3つしかない。</p>
+<ul>
+<li><b>Scale（拡大）</b>：価値が出て再現性がある</li>
+<li><b>Pause（一時停止）</b>：前提条件（データ・規制・体制）が未成熟。条件が整えば再開</li>
+<li><b>Terminate（中止）</b>：価値が出ない／前提が崩れた。<b>撤退も正解の選択肢</b>（サンクコストで続けるのは誤答）</li>
+</ul>
+
+<h4>AIが適切でない場合（Skill 2.1.4）</h4>
+<ul>
+<li>規則が明確で例外が少ない → ルールベース</li>
+<li>データが無い・偏っている・品質が担保できない</li>
+<li>誤りの影響が致命的で、確率的な出力を許容できない</li>
+<li>問題の定義や成功の測り方が決まっていない</li>
+<li>単純な業務改善・プロセス設計で解決する（そもそもの業務が無駄）</li>
+</ul>
+
+<h4>移行時の検討事項（Skill 2.1.5）</h4>
+<p>既存業務をAIに移すとき／AIプラットフォームを乗り換えるときに見る4点。</p>
+<table>
+<tr><th>観点</th><th>具体</th></tr>
+<tr><td>事業継続性</td><td>切替中に業務が止まらないか。並行稼働・段階移行・切り戻し手順</td></tr>
+<tr><td>コストへの影響</td><td>移行費用に加え、推論単価・課金モデルの違い、二重稼働期間の費用</td></tr>
+<tr><td>データ準備性</td><td>移行先で使える形か。データの持ち出し可否・ロックイン</td></tr>
+<tr><td>性能への影響</td><td>精度・応答速度が現行より落ちないか。同じプロンプトが別モデルで同じ結果にならない</td></tr>
+</table>
+
+<h3>Task 2.2 価値の測定 — 配点の中心</h3>
+
+<div class="card okbox">
+<h4>Skill 2.2.2 ベースライン（基準線）— 最重要の1問</h4>
+<p><b>AI導入の「前」に現状値を測っておく。</b>これが無いと後から効果を主張できない。「導入したが効果を示せない」という状況の原因は、ほぼ必ず基準線の欠如。</p>
+<p>「導入前にまず何をすべきか」型の問題では<b>ベースライン測定が正解</b>。</p>
+</div>
+
+<h4>KPIの2分類（Skill 2.2.1）</h4>
+<table>
+<tr><th>種類</th><th>例</th><th>扱い</th></tr>
+<tr><td>有形（tangible）</td><td>コスト削減額・売上増・処理時間短縮・人件費</td><td>金額に換算できる。ROIの分子</td></tr>
+<tr><td>無形（intangible）</td><td>顧客満足度・従業員の生産性実感・従業員定着・ブランド</td><td>金額化しにくいが<b>測らないのは誤り</b>。代理指標（NPS・離職率・アンケート）で測る</td></tr>
+</table>
+<p class="lead">「無形の効果は測れないので対象外」は誤答。有形だけで判断するとAIの価値を過小評価する。</p>
+
+<h4>ROIの枠組み（Skill 2.2.3）</h4>
+<p>ROI ＝（便益 − コスト）÷ コスト。便益に入れる4系統＝<b>時間削減・コスト削減・売上増・生産性向上</b>。</p>
+<details>
+<summary>コスト側に入れ忘れやすいもの</summary>
+<ul>
+<li>推論（トークン）の継続費用 ← 最大の見落とし</li>
+<li>データ整備・ラベリングの工数</li>
+<li>統合・既存システム改修</li>
+<li>研修・チェンジマネジメント</li>
+<li>監視・再学習・ガバナンスの運用費</li>
+</ul>
+</details>
+
+<h4>先行指標（Skill 2.2.4）</h4>
+<p>成果（遅行指標）が出る前に成功を予測できる指標。<b>「まだROIが出ていないが順調か知りたい」型の答え。</b></p>
+<ul>
+<li>利用率・アクティブユーザー数（作ったが使われていない兆候を早く掴む）</li>
+<li>AIの出力が人にどれだけ修正されたか（修正率が下がる＝役に立ってきている）</li>
+<li>研修受講率・AIリテラシーの広がり</li>
+<li>経営スポンサーの関与度・ユースケース申請数</li>
+</ul>
+
+<h4>コスト管理（Skill 2.2.5）</h4>
+<table>
+<tr><th>課金モデル</th><th>中身</th><th>合う使い方</th></tr>
+<tr><td>消費ベース（従量・トークン）</td><td>使った分だけ。Bedrockのオンデマンド等</td><td>利用量が読めない初期・PoC</td></tr>
+<tr><td>インスタンスベース</td><td>確保した計算資源に対して時間課金</td><td>安定して大量に使う・専用スループットが要る</td></tr>
+<tr><td>シートベース</td><td>利用者1人あたり月額</td><td>業務アシスタント系（Amazon Quick等）</td></tr>
+</table>
+<p>最適化の打ち手＝<b>用途に合う小さいモデルを選ぶ</b>／不要な長文プロンプトを削る（トークン削減）／キャッシュ・バッチ処理／安定利用分は<b>Savings Plans</b>等のコミット割引／<b>AWS Pricing Calculator</b>で事前見積・<b>Cost Explorer</b>で実績分析。</p>
+
+<h3>Task 2.3 競争優位としての位置づけ</h3>
+<ul>
+<li><b>Skill 2.3.1</b>：競合の成熟度を見て、追随か先行かを決める。「競合がやっているから」だけでは投資判断にならない。</li>
+<li><b>Skill 2.3.2</b>：ビジネスモデル自体の転換機会（売り切り→従量サービス化、製品→データを使った予測サービス）。既存業務の効率化より大きい効果。</li>
+<li><b>Skill 2.3.3</b>：<b>持続する優位はモデルではなく、独自データ・業務への組み込み・組織の能力から生まれる</b>。基盤モデルは誰でも買えるので、それ自体は優位にならない。</li>
+<li><b>Skill 2.3.4</b>：投資水準は業界の成熟度と競争の激しさで決める。全業界一律に「最大投資」は誤答。規制が厳しく成熟が遅い業界では慎重な段階投資が正解になりうる。</li>
+</ul>
+
+<h2 id="d3">D3 AIガバナンスと責任あるAI <span class="pct">24%</span></h2>
+<p class="lead">Task 3.1 原則の適用 / 3.2 統治構造と規制対応 / 3.3 リスクと緩和</p>
+
+<h3>Task 3.1 責任あるAIの原則</h3>
+
+<table>
+<tr><th>次元</th><th>中身</th><th>問題文に出る症状</th></tr>
+<tr><td>公平性 fairness</td><td>特定の属性に不利な結果を出さない</td><td>採用・与信で特定層の通過率が低い</td></tr>
+<tr><td>説明可能性 explainability</td><td>なぜその出力になったか説明できる</td><td>「顧客に理由を説明する義務がある」「規制当局に示す」</td></tr>
+<tr><td>プライバシー privacy</td><td>個人データの適切な扱い・同意・最小化</td><td>個人情報を学習やプロンプトに入れてしまう</td></tr>
+<tr><td>安全性 safety</td><td>有害な出力・危険な行動をさせない</td><td>不適切なコンテンツ・危険な助言</td></tr>
+<tr><td>透明性 transparency</td><td>AIを使っていること・限界を開示する</td><td>「AIが応答していると伝えていない」</td></tr>
+<tr><td>堅牢性 robustness</td><td>想定外の入力・攻撃でも壊れない</td><td>変な入力で出力が崩れる・悪用される</td></tr>
+<tr><td>統治 governance</td><td>責任者・手続き・記録がある</td><td>誰が承認したか不明</td></tr>
+<tr><td>制御性 controllability</td><td>止められる・介入できる</td><td>自律エージェントを止める手段がない</td></tr>
+</table>
+
+<div class="card warnbox">
+<h4>Skill 3.1.2 トレードオフの捌き方 — 判断問題の核心</h4>
+<p>事業目標と責任あるAIが衝突したとき、試験の正解は<b>「片方を捨てる」ではない</b>。</p>
+<table>
+<tr><th>衝突</th><th>正解の方向</th></tr>
+<tr><td>精度を上げたいが説明できないモデルになる</td><td>用途で分ける。規制・人生に影響する判断は説明可能な方式＋人の確認を入れる</td></tr>
+<tr><td>早く出したいがバイアス検証が終わらない</td><td>範囲を限定して出す（限定公開・人の監督付き）。検証を飛ばして全面公開は誤答</td></tr>
+<tr><td>個人データを使えば精度が上がる</td><td>目的・同意・最小限の範囲に絞る。「精度のため全部使う」は誤答</td></tr>
+<tr><td>コスト削減のため人の確認を外したい</td><td>影響度でリスク分類し、高リスクだけ人を残す</td></tr>
+</table>
+<p><b>共通の型＝リスクの高さで扱いを分ける。全部同じ厳しさにするのも、全部緩めるのも誤答。</b></p>
+</div>
+
+<h4>Skill 3.1.3 ガバナンス・バイ・デザイン</h4>
+<p>責任あるAIの検討は<b>企画・計画の段階から</b>入れる。「本番稼働後に問題が出たら対処する」「まずPoCを作ってから考える」は誤答。後から入れると手戻りが大きく、すでに損害が出ている。</p>
+
+<h4>Skill 3.1.4 人の監督と安全装置</h4>
+<table>
+<tr><th>安全装置</th><th>役割</th></tr>
+<tr><td>ガードレール</td><td>入力・出力を制限して不適切な内容や機密を弾く（Amazon Bedrock Guardrails）</td></tr>
+<tr><td>ハルシネーション検出</td><td>根拠のない出力を見つける。出典提示・RAGの根拠突合</td></tr>
+<tr><td>エスカレーション基準</td><td>確信度が低い・高額・苦情・例外のときに人に回す条件を先に決める</td></tr>
+<tr><td>人による確認（human in the loop）</td><td>最終決定を人が持つ。<b>採用・与信・医療・法務など人に重大な影響が及ぶ判断では必須</b></td></tr>
+</table>
+
+<h3>Task 3.2 統治構造と規制対応</h3>
+
+<h4>Skill 3.2.1 AIガバナンス体制</h4>
+<ul>
+<li><b>部門横断で作る</b>：事業部門・技術・法務・コンプライアンス・セキュリティ・リスク管理・人事。「IT部門だけで運営する」は誤答。</li>
+<li><b>説明責任を明確にする</b>：ユースケースごとに承認者・オーナー・監視責任者を決める。「AIが決めたことだから誰も責任を負わない」は成立しない。</li>
+<li>審査・承認のプロセス、記録、定期レビューを持つ。</li>
+</ul>
+
+<h4>Skill 3.2.2 規制対応</h4>
+<p>業界・地域で要求が違う（医療・金融・個人データの越境移転・自動意思決定の説明義務など）。ポイントは<b>「どの法律か」を暗記するのではなく、規制要件を早期に特定して設計に織り込む</b>こと。ベンダー選定（Skill 2.1.2）でも規制適合は必須条件。</p>
+
+<h4>Skill 3.2.3 アクセス制御とデータ保護</h4>
+<ul>
+<li>最小権限。AIが参照できる範囲を役割で絞る。</li>
+<li><b>人の閲覧権限とAIに渡す範囲は別に決める</b>。権限があってもAIに入れない区分（診断情報・相談記録など）を持つ。</li>
+<li>保存時・通信時の暗号化、監査ログ、データ保持と廃棄の方針。</li>
+<li><b>AWS責任共有モデル</b>：AWSはクラウド「の」セキュリティ（基盤・物理・サービス自体）、利用者はクラウド「内の」セキュリティ（自社データ・アクセス権・使い方・プロンプトに何を入れるか）。<b>マネージドサービスを使ってもデータの責任は利用者側に残る</b>。</li>
+</ul>
+
+<h4>Skill 3.2.4 AIリスク分類</h4>
+<p>全ユースケースを同じ厳しさで審査すると回らない。<b>影響度でクラス分けして、統治の強さを変える</b>。</p>
+<table>
+<tr><th>リスク水準</th><th>例</th><th>統治の強さ</th></tr>
+<tr><td>低</td><td>社内文書の要約・議事録の下書き</td><td>簡易チェック・利用ガイドラインのみ</td></tr>
+<tr><td>中</td><td>顧客向けチャット・マーケ文面生成</td><td>ガードレール・出力レビュー・監視</td></tr>
+<tr><td>高</td><td>与信・採用・医療・安全に関わる判断</td><td>人の最終決定必須・バイアス検証・説明可能性・監査記録・上位承認</td></tr>
+</table>
+
+<h3>Task 3.3 企業のAIリスクと緩和</h3>
+
+<table>
+<tr><th>リスク</th><th>中身</th><th>緩和策</th></tr>
+<tr><td>ハルシネーション</td><td>もっともらしい嘘を生成する</td><td>RAGで根拠を渡す・出典提示・人の確認・用途を限定</td></tr>
+<tr><td>バイアス</td><td>データ・設計・運用の<b>複数段階で発生しうる</b>（Skill 3.3.2）</td><td>各段階で検証。運用後も<b>バイアスドリフト</b>を定期測定</td></tr>
+<tr><td>データ品質の劣化</td><td>入力側の変化で出力が崩れる</td><td>入力データの監視も含める</td></tr>
+<tr><td>モデルドリフト</td><td>現実の変化で精度が落ちる</td><td>性能監視・再学習の計画・閾値でアラート</td></tr>
+<tr><td>有害コンテンツ</td><td>不適切・差別的・危険な出力</td><td>ガードレール・コンテンツフィルタ・報告経路</td></tr>
+<tr><td>知的財産（IP）</td><td>学習データの権利・生成物の権利帰属・他社IPの混入・自社機密を外部モデルに入れる</td><td>利用規約とデータ取り扱いの確認・機密を入れない運用・出力のチェック・ベンダーの補償条項を確認</td></tr>
+</table>
+<p class="lead"><b>Skill 3.3.1</b>：本番のAIには「リスク管理の仕掛けと監視」が必要。作った時点のテストで終わりにしない。ここもD1のドリフトと同じ結論に着地する。</p>
+
+<h2 id="d4">D4 ビジネスレディネス・リーダーシップ・AI変革 <span class="pct">24%</span></h2>
+<p class="lead">Task 4.1 成熟度評価 / 4.2 データと基盤 / 4.3 変革と人材 / 4.4 拡大</p>
+
+<h3>Task 4.1 準備度と成熟度</h3>
+
+<h4>Skill 4.1.1 評価する5つの次元</h4>
+<table>
+<tr><th>次元</th><th>見るもの</th><th>欠けたときの症状</th></tr>
+<tr><td>経営の同意（leadership alignment）</td><td>スポンサーがいて優先順位が合っているか</td><td>予算と人が付かず立ち消える</td></tr>
+<tr><td>データ品質</td><td>使える状態か・どこにあるか</td><td>PoCで止まる最大の原因</td></tr>
+<tr><td>文化の準備</td><td>変化と失敗を許容できるか</td><td>現場が使わない</td></tr>
+<tr><td>技術基盤</td><td>計算資源・統合・セキュリティ</td><td>拡大時に破れる</td></tr>
+<tr><td>ガバナンス枠組み</td><td>承認・責任・監視の仕組み</td><td>本番に出せない</td></tr>
+</table>
+
+<h4>Skill 4.1.2 AI成熟度モデル</h4>
+<p>段階は「実験 → 部門で運用 → 全社展開 → AIが事業に組み込まれた状態」。<b>試験の型＝現在地に合った打ち手を選ぶ。</b>実験段階の組織に「全社CoEと大規模投資」を当てるのも、全社展開段階に「まずPoCを1つ」と言うのも誤答。</p>
+
+<h4>Skill 4.1.3 能力ギャップの4軸</h4>
+<p><b>人（People）・プロセス（Process）・技術（Technology）・ガバナンス（Governance）</b>。この4軸は複数選択問題で「軸違いの2つを選ぶ」ときの道具になる。技術だけ手当てして人とプロセスを放置するのが典型的な失敗。</p>
+
+<h3>Task 4.2 データと基盤</h3>
+<ul>
+<li><b>Skill 4.2.1 データ準備性</b>：品質・アクセス可能性・<b>サイロ</b>。部門ごとにデータが分断されていると、部門横断のユースケースが作れない。「AIの前にデータ統合」が正解になる場面。</li>
+<li><b>Skill 4.2.2 データ戦略</b>：<b>データオーナーシップ</b>（誰がその データの正本を持ち品質に責任を負うか）と<b>データ共有の枠組み</b>（部門間でどう渡すか・誰が承認するか）。技術で解く前に決める統治の話。</li>
+<li><b>Skill 4.2.3 技術基盤</b>：計算資源・ストレージ・統合（既存システムとつながるか）・セキュリティ。<b>拡大の段階で足りなくなる</b>ので、PoCの時点で全社展開時の要件を見ておく。</li>
+</ul>
+
+<h3>Task 4.3 全社変革と人材</h3>
+
+<div class="card">
+<h4>Skill 4.3.1〜4.3.2 体制</h4>
+<ul>
+<li><b>経営スポンサーシップ</b>：役員レベルの後ろ盾。これが無いAI施策は途中で失速する（最頻出の失敗原因）。</li>
+<li><b>AIチャンピオン</b>：各部門で推進する人を見つけ、権限と時間を与える。上からの号令だけでは現場が動かない。</li>
+<li><b>部門横断チーム</b>：事業リード・技術専門家・法務・コンプライアンスを揃え、<b>明確な責任分担</b>を置く。</li>
+</ul>
+</div>
+
+<h4>Skill 4.3.3 従業員への伝え方</h4>
+<p>不安の中身は「自分の仕事が無くなるのでは」。正解の型は<b>透明な情報開示</b>：導入時期、期待する成果、<b>役割にどう影響するか</b>を早く正直に伝える。「不安を招くので詳細は伏せる」「決まってから知らせる」は誤答。噂が先に広がる。</p>
+
+<h4>Skill 4.3.4 文化の壁と介入</h4>
+<table>
+<tr><th>壁</th><th>リーダーの介入</th></tr>
+<tr><td>リスク回避的</td><td>小さく安全に試せる場を用意する（限定範囲のPoC）</td></tr>
+<tr><td>変化への抵抗</td><td>現場が痛い業務から始めて、効果を当事者の言葉で共有する</td></tr>
+<tr><td>失敗への恐れ</td><td>実験の失敗を責めない方針を経営が明言する・学びを評価する</td></tr>
+<tr><td>不信（精度・仕事の喪失）</td><td>人が最終決定を持つ設計を示す・研修で触らせる</td></tr>
+</table>
+
+<h4>Skill 4.3.5 AIリテラシーを広げる手段</h4>
+<ul>
+<li>PoCプログラム（現場が自分の業務で試す）</li>
+<li>ハッカソン（短期間で体験させる・チャンピオン発掘に効く）</li>
+<li>役割別の研修プログラム（経営層・管理職・現場で内容を変える）</li>
+<li><b>責任あるAIの研修</b>（使い方だけでなくリスクと禁止事項）</li>
+</ul>
+
+<h4>Skill 4.3.6 人の役割の移し方</h4>
+<p>「作業する人」から<b>「AIを監督し協働する人」</b>へ。人の強み＝<b>批判的思考・共感・創造性・例外判断・責任を負うこと</b>。AIの強み＝速度・量・一貫性・24時間。<b>置き換えでなく分担を設計する</b>のが正解の方向。</p>
+
+<h3>Task 4.4 パイロットから全社展開へ</h3>
+
+<div class="card okbox">
+<h4>Skill 4.4.1 反復的な変革の4フェーズ</h4>
+<p><b>Envision（構想）→ Experiment（実験）→ Launch（立ち上げ）→ Scale（拡大）</b></p>
+<p>AWS CAFの考え方と同じ並び。<b>一足飛びに全社展開は誤答</b>。逆に、実験を繰り返すだけで本番に出さない「PoC地獄」も誤答。</p>
+</div>
+
+<ul>
+<li><b>Skill 4.4.2</b>：短期の成果（quick win）から始め、それを足場に全社へ広げる。最初に全社基盤を完璧に作ってから始めるのは遅すぎる。</li>
+<li><b>Skill 4.4.3 CoE（センターオブエクセレンス）</b>：知見・標準・再利用部品・ガバナンスを集約する横断組織。<b>複数部門で同じ試行錯誤が重複し始めたときが設置のタイミング</b>。1件目のPoCの前に作るものではない。</li>
+<li><b>Skill 4.4.4</b>：継続的なフィードバックの仕組みと成功指標を置き、短期の効果だけでなく長期の価値を追う。</li>
+<li><b>Skill 4.4.5 実験から本番へ</b>：PoCと本番の差は<b>ガバナンスと運用要件</b>。監視・SLA・サポート体制・障害時の手順・再学習・監査記録・責任者。「PoCで動いたからそのまま本番」は誤答。</li>
+<li><b>Skill 4.4.6</b>：拡大の過程で事業継続性と性能を確保する。利用者が増えたときのコスト・レイテンシー・品質の劣化を事前に見る。</li>
+</ul>
+
+<h2 id="aws">範囲内のAWSサービスと枠組み <span class="pct">戦略レベルのみ</span></h2>
+
+<table>
+<tr><th>対象</th><th>何をする物か（1文）</th><th>ビジネス判断での使い所</th></tr>
+<tr><td><b>Amazon Bedrock</b></td><td>複数社の基盤モデルをAPIで使えるマネージドな生成AI基盤</td><td>自前構築せず生成AIを使う既定の選択。モデルを選べる＝乗り換え余地</td></tr>
+<tr><td>└ Guardrails</td><td>入出力に安全のフィルタと禁止トピックをかける</td><td>D3の安全装置の具体。有害出力・機密漏洩の緩和</td></tr>
+<tr><td>└ Knowledge Bases</td><td>社内文書を根拠にして答えさせる（RAGのマネージド実装）</td><td>「社内規程を出典付きで答える」要件の答え</td></tr>
+<tr><td>└ 料金階層</td><td>オンデマンド（従量）／ バッチ ／ プロビジョンドスループット（確保型）</td><td>量が読めない初期は従量、安定大量なら確保型</td></tr>
+<tr><td><b>Amazon SageMaker AI</b></td><td>自社データで独自のMLモデルを作り運用する基盤</td><td>既製モデルでは足りず<b>独自モデルが競争優位になる</b>ときだけ。要員と期間が必要</td></tr>
+<tr><td><b>Amazon Quick</b></td><td>AIを使ったビジネス向けアシスタント・BI（シート課金）</td><td>現場の分析・業務支援を早く配る。開発不要</td></tr>
+<tr><td><b>AWS CAF</b></td><td>クラウド／AI導入を6つの観点で計画する枠組み</td><td>組織の準備度評価と展開計画。D4の道具</td></tr>
+<tr><td><b>責任共有モデル</b></td><td>AWSは基盤の安全、利用者は自社データと使い方の安全</td><td>「マネージドだから任せた」は誤り。データの責任は残る</td></tr>
+<tr><td><b>Well-Architected（Responsible AI Lens）</b></td><td>責任あるAIの設計・統治のベストプラクティス集</td><td>ガバナンスの基準として参照</td></tr>
+<tr><td><b>Pricing Calculator</b></td><td>導入<b>前</b>の見積り</td><td>ビジネスケース作成・ROIのコスト側</td></tr>
+<tr><td><b>Cost Explorer</b></td><td>導入<b>後</b>の実績可視化と分析</td><td>コスト超過の検知・最適化</td></tr>
+<tr><td><b>AWS Marketplace</b></td><td>サードパーティのAIソリューションを調達できる場</td><td><b>Buy / Partner</b> の判断材料。自社構築との比較</td></tr>
+<tr><td>Savings Plans</td><td>一定利用を約束して単価を下げる</td><td>安定稼働分のコスト最適化</td></tr>
+</table>
+
+<details>
+<summary>AWS CAF の6つの観点（Perspectives）</summary>
+<p>ビジネス / 人材（People）/ ガバナンス / プラットフォーム / セキュリティ / オペレーション。<br>
+前3つが「人と組織」、後3つが「技術と運用」。D4の能力ギャップ4軸（人・プロセス・技術・ガバナンス）と同じ発想で、<b>技術だけ整えても足りない</b>ことを示す枠組み。</p>
+</details>
+
+<h2 id="kime">決め手の1語 → 答え <span class="pct">直前に回す表</span></h2>
+
+<table>
+<tr><th>問題文の語</th><th>向かう答え</th></tr>
+<tr><td>出典・根拠を示したい／社内文書／情報が頻繁に変わる</td><td>RAG（Knowledge Bases）</td></tr>
+<tr><td>自社特有の言い回し・出力形式を固定したい／教師データが大量にある</td><td>ファインチューニング</td></tr>
+<tr><td>まず費用をかけずに改善したい</td><td>プロンプトエンジニアリング</td></tr>
+<tr><td>規則が明確・例外が少ない・完全な一貫性が必要</td><td>ルールベース自動化（AIを使わない）</td></tr>
+<tr><td>データが無い／問題定義が曖昧／誤りが致命的</td><td>AIを採用しない・Pause</td></tr>
+<tr><td>長い会話で前を忘れる／長文の後半が雑</td><td>コンテキストウィンドウの上限</td></tr>
+<tr><td>費用が想定を超えた</td><td>トークン量・課金モデルの見直し</td></tr>
+<tr><td>導入前にまず何をすべきか</td><td><b>ベースライン測定</b>／データ品質の確認</td></tr>
+<tr><td>効果を経営に示せない</td><td>基準線が無い・KPI未定義</td></tr>
+<tr><td>まだROIが出ていないが順調か知りたい</td><td>先行指標（利用率・修正率）</td></tr>
+<tr><td>顧客満足・従業員の生産性</td><td>無形の便益。代理指標で測る（対象外にしない）</td></tr>
+<tr><td>短納期・社内に人材がいない・一般的な業務</td><td>Buy（Marketplace含む）</td></tr>
+<tr><td>それ自体が競争優位・独自データがある</td><td>Build</td></tr>
+<tr><td>能力が足りないが独自性も要る・規制知見が必要</td><td>Partner</td></tr>
+<tr><td>持続する競争優位の源泉は何か</td><td>独自データ・業務への組み込み・組織能力（モデルではない）</td></tr>
+<tr><td>いつ責任あるAIを検討するか</td><td>企画・計画段階から（governance by design）</td></tr>
+<tr><td>採用・与信・医療・安全に関わる判断</td><td>人が最終決定（human in the loop）＋高リスク分類</td></tr>
+<tr><td>審査が回らない／全部を厳しくできない</td><td>リスク分類して統治の強さを変える</td></tr>
+<tr><td>不適切な出力・機密の混入を止めたい</td><td>ガードレール</td></tr>
+<tr><td>もっともらしい嘘</td><td>ハルシネーション → RAG・出典・人の確認</td></tr>
+<tr><td>時間が経って精度が落ちた</td><td>モデルドリフト → 継続監視・再学習</td></tr>
+<tr><td>運用中に偏りが増えた</td><td>バイアスドリフト → 定期測定</td></tr>
+<tr><td>従業員が勝手に外部AIを使っている</td><td>シャドーAI → 承認/禁止/評価中の透明な分類（全面禁止は誤答）</td></tr>
+<tr><td>ガバナンス体制を誰で作るか</td><td>部門横断（事業・技術・法務・コンプラ）＋責任の明確化</td></tr>
+<tr><td>マネージドサービスだから安全か</td><td>責任共有モデル。データと使い方の責任は利用者</td></tr>
+<tr><td>部門ごとにデータが分断</td><td>データサイロ → データ戦略・オーナーシップ・共有枠組み</td></tr>
+<tr><td>AI施策が途中で失速する</td><td>経営スポンサーシップの欠如</td></tr>
+<tr><td>現場が使わない</td><td>文化・研修・チャンピオン（技術でなく人の問題）</td></tr>
+<tr><td>従業員が不安を訴えている</td><td>透明な情報開示（時期・成果・役割への影響）</td></tr>
+<tr><td>PoCで動いたので全社に出す</td><td>誤答。ガバナンス・運用要件（監視・SLA・責任者）を整える</td></tr>
+<tr><td>複数部門で同じ試行錯誤が重複</td><td>CoEの設置</td></tr>
+<tr><td>拡大の進め方</td><td>Envision → Experiment → Launch → Scale。短期の成果から積む</td></tr>
+<tr><td>価値が出ない施策をどうするか</td><td>Pause または Terminate（撤退も正解）</td></tr>
+<tr><td>導入前の見積り／導入後の実績</td><td>Pricing Calculator ／ Cost Explorer</td></tr>
+<tr><td>AIの用語が全社でバラバラ／認証を取りたい</td><td>ISO/IEC 23053（語彙）／ ISO/IEC 42001（AIMS・認証）</td></tr>
+</table>
+
+<h2 id="out">範囲外（選択肢に出たら切る） <span class="pct">罠の見分け</span></h2>
+
+<div class="card warnbox">
+<p>以下は公式に<b>対象候補者の職務範囲外</b>と書かれている。選択肢がこの領域の作業を指していたら、ビジネス判断を問う問題の答えにはならない。</p>
+<ul>
+<li>モデル・アルゴリズムの開発・コーディング</li>
+<li>データエンジニアリング・特徴量エンジニアリング</li>
+<li>ハイパーパラメータチューニング・モデル最適化</li>
+<li>AI/MLパイプライン・インフラの構築とデプロイ</li>
+<li>モデルの数学的・統計的な分析</li>
+<li>セキュリティ／コンプライアンスの<b>実装</b>（方針決定は範囲内、実装は範囲外）</li>
+<li>AWSサービスの設定・管理</li>
+<li>アルゴリズム・フレームワーク・技術アーキテクチャの選定とチューニング</li>
+<li>データの前処理・クレンジング・ラベリング・アノテーションの手作業</li>
+<li>本番の技術運用（インフラ監視・パイプラインのデバッグ・性能のトラブルシュート）</li>
+</ul>
+<p class="lead">注意：<b>「監視が必要だと判断する」は範囲内</b>（Skill 1.2.3・3.3.1）で、「監視ツールを設定する」は範囲外。同じ言葉でも判断か実装かで切る。</p>
+</div>
+
+<p class="foot">
+出典：AWS公式試験ガイド
+<a class="src" href="https://docs.aws.amazon.com/aws-certification/latest/ai-business-strategist-01/ai-business-strategist-01.html">AWS Certified AI Business Strategist (AIB-C01)</a>
+の4ドメイン・Task・Skill、Technologies and concepts、In-scope / Out-of-scope services。
+ライセンス順守のため内容は日本語に要約・再構成している（原文の逐語転載はしていない）。<br>
+判断軸・決め手の表・罠の指摘は当ノート独自の整理であり、公式見解ではない。
+</p>
+
+</div>
+</body>
+</html>

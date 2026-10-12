@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AIB こんな時どっち？</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;background:#f2eee3;color:#121212;min-height:100vh;max-width:680px;margin:0 auto;padding:0 0 60px}
+.app{text-align:center;padding:18px 16px 0}
+
+/* ヘッダー（index.htmlと共通デザイン） */
+header{position:sticky;top:0;z-index:10;background:rgba(242,238,227,.96);backdrop-filter:blur(8px);border-bottom:3px double #6e6857;padding:12px 16px}
+.htop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.htitle{font-size:17px;font-weight:700;color:#26221a;font-family:'Hiragino Mincho ProN','Yu Mincho','游明朝',serif;letter-spacing:.06em}
+.hstat{font-size:14px;color:#6e6857}
+.bar{height:5px;background:#ece7d8;margin-top:10px;overflow:hidden}
+.bar>i{display:block;height:100%;background:#1a3a5f;width:0;transition:width .3s}
+
+/* ナビ（index.htmlと共通デザイン） */
+.appnav{display:flex;gap:6px;padding:8px 16px;background:#f2eee3}
+.appnav .navbtn{flex:1;text-align:center;text-decoration:none;font-size:14px;font-weight:700;color:#6e6857;background:#fbf9f2;border:1px solid #c8c2b0;padding:9px 4px}
+.appnav .navbtn.active{color:#fafafa;background:#1a3a5f;border-color:#1a3a5f}
+
+/* トップ */
+.top h1{font-size:25px;color:#26221a;margin-bottom:6px;font-family:'Hiragino Mincho ProN','Yu Mincho','游明朝',serif;letter-spacing:.04em;text-align:left;line-height:1.4}
+.top .sub{font-size:16px;color:#6e6857;margin-bottom:20px;text-align:left}
+.decks{display:flex;flex-direction:column;gap:10px;text-align:left}
+.deck{background:#fbf9f2;border:1px solid #c8c2b0;padding:16px 18px;cursor:pointer;font-family:inherit;font-size:17px;color:#183251;font-weight:700;text-align:left;width:100%}
+.deck:hover{border-color:#21537f;background:#ece7d8}
+.deck .cnt{font-size:13px;color:#5e5e5e;font-weight:400;margin-left:8px}
+.deck.todo{opacity:.4;cursor:default;font-weight:400}
+.deck.todo:hover{border-color:#c8c2b0;background:#fbf9f2}
+
+/* クイズ */
+.quiz{display:none;flex-direction:column;align-items:center}
+.progress{font-size:13px;color:#5e5e5e;margin-bottom:18px}
+.situation{font-size:22px;font-weight:700;color:#121212;margin-bottom:28px;line-height:1.5;text-align:center}
+.choices{display:flex;flex-direction:column;gap:12px;width:100%}
+.ch{background:#fbf9f2;border:2px solid #c8c2b0;padding:16px 20px;cursor:pointer;font-family:inherit;font-size:18px;color:#183251;font-weight:700;text-align:center;transition:all .15s}
+.ch:hover{border-color:#21537f;background:#ece7d8;transform:scale(1.02)}
+.ch:active{transform:scale(.98)}
+
+/* 結果 */
+.result{display:none;flex-direction:column;align-items:center}
+.res-icon{font-size:48px;margin-bottom:12px;font-family:'Hiragino Mincho ProN','Yu Mincho','游明朝',serif;font-weight:700;line-height:1.2}
+.res-icon.ok{color:#183251}
+.res-icon.ng{color:#bf3a2b}
+.res-text{font-size:20px;font-weight:700;margin-bottom:6px;font-family:'Hiragino Mincho ProN','Yu Mincho','游明朝',serif}
+.res-text.ok{color:#183251}
+.res-text.ng{color:#bf3a2b}
+.res-choices{display:flex;flex-direction:column;gap:8px;width:100%;margin-bottom:16px}
+.res-opt{font-size:17px;padding:12px 15px;border:1px solid #c8c2b0;background:#fbf9f2;text-align:left;line-height:1.55;color:#333}
+.res-opt.correct{background:#edf2ea;border:2px solid #2f7a4a;color:#121212;font-weight:700}
+.res-opt.picked-wrong{background:#f6ebe8;border:2px solid #bf3a2b;color:#121212}
+.res-opt .rmk{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.res-why{font-size:17px;color:#121212;margin-bottom:14px;line-height:1.7;text-align:left;background:#fbf9f2;padding:16px 18px;border-left:4px solid #21537f;width:100%}
+.res-why b{color:#183251}
+.res-tip{font-size:16px;color:#121212;margin-bottom:24px;line-height:1.7;text-align:left;background:#f7f2e2;padding:16px 18px;border-left:4px solid #ba8425;width:100%}
+.res-tip b{color:#7a471a}
+.nextbtn{background:#21537f;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;font-family:inherit;font-weight:700}
+.nextbtn:hover{background:#162a42}
+.res-btns{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.backbtn{background:#f2eee3;color:#21537f;border:1px solid #c8c2b0;padding:14px 22px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700}
+.backbtn:hover{background:#ece7d8;border-color:#21537f}
+.backbtn:disabled{opacity:.3;cursor:default}
+.quiz-back{margin-top:22px;background:transparent;color:#5e5e5e;border:1px solid #c8c2b0;padding:9px 18px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:700}
+.quiz-back:hover{background:#ece7d8;color:#21537f;border-color:#21537f}
+
+/* スコア */
+.score{display:none;flex-direction:column;align-items:center}
+.score-num{font-size:42px;font-weight:700;color:#183251;margin-bottom:8px;font-family:'Hiragino Mincho ProN','Yu Mincho','游明朝',serif}
+.score-sub{font-size:16px;color:#5e5e5e;margin-bottom:24px}
+.score-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.score-btns button{padding:12px 22px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;border:none}
+.score-btns .retry{background:#21537f;color:#fff}
+.score-btns .retry:hover{background:#162a42}
+.score-btns .back{background:#f2eee3;color:#21537f;border:1px solid #c8c2b0}
+.score-btns .back:hover{background:#ece7d8}
+
+.hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop">
+    <div class="htitle">AIB どっち</div>
+    <div class="hstat" id="hstat"></div>
+  </div>
+  <div class="bar"><i id="hbar"></i></div>
+</header>
+<nav class="appnav">
+  <a class="navbtn" href="index.html">ドリル</a>
+  <a class="navbtn active" href="amida.html">どっち</a>
+  <a class="navbtn" href="note.html">ノート</a>
+</nav>
+<div class="app">
+  <div class="top" id="top">
+    <h1>こんな時どっち？</h1>
+    <div class="sub">2択・3択で答える。電車で10秒ずつ。</div>
+    <div id="no-deck" class="sub" style="display:none;color:#bf3a2b">デッキのファイル（amida-flash.js）が見つかりません。手元専用のため公開版には入っていません。</div>
+    <div id="import-tool" style="margin-bottom:16px;text-align:center">
+      <button id="import-btn" class="deck" style="border-color:#ba8425;background:#f7f2e2;text-align:center">ドリル弱点を取り込む</button>
+    </div>
+    <div class="decks" id="decks"></div>
+  </div>
+  <div class="quiz" id="quiz">
+    <div class="progress" id="progress"></div>
+    <div class="situation" id="situation"></div>
+    <div class="choices" id="choices"></div>
+    <button class="quiz-back" id="quiz-back" style="display:none">← 前の問題の解説を見る</button>
+  </div>
+  <div class="result" id="result">
+    <div class="res-icon" id="res-icon"></div>
+    <div class="res-text" id="res-text"></div>
+    <div class="res-choices" id="res-choices"></div>
+    <div class="res-why" id="res-why"></div>
+    <div class="res-tip" id="res-tip" style="display:none"></div>
+    <div class="res-btns">
+      <button class="backbtn" id="backbtn">← 前へ</button>
+      <button class="nextbtn" id="nextbtn">次へ →</button>
+    </div>
+  </div>
+  <div class="score" id="score">
+    <div class="score-num" id="score-num"></div>
+    <div class="score-sub" id="score-sub"></div>
+    <div class="score-btns">
+      <button class="retry" id="score-wrong" style="background:#bf3a2b;display:none">❌ 間違えたやつだけ</button>
+      <button class="retry" id="score-retry">もう一度</button>
+      <button class="back" id="score-back">別のデッキ</button>
+    </div>
+  </div>
+  <!-- Import Modal -->
+  <div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;padding:20px;overflow-y:auto">
+    <div style="background:#fbf9f2;max-width:500px;margin:40px auto;padding:20px;">
+      <h3 style="margin-bottom:12px">ドリル弱点を取り込む</h3>
+      <p style="font-size:14px;color:#5e5e5e;margin-bottom:14px">ドリルで間違えた問題をAmidaの「間違えたものモード」に取り込みます。AmidaのlocalStorageデータが変更されます。</p>
+      <details style="margin-bottom:14px">
+        <summary style="cursor:pointer;font-size:14px;color:#21537f;font-weight:700">💾 ふっかつのじゅもんから取り込む（別端末のデータ）</summary>
+        <textarea id="import-jumon" style="width:100%;height:80px;margin-top:8px;font-size:13px;border:1px solid #c8c2b0;padding:8px;" placeholder="AIBv1:... のじゅもんを貼り付け"></textarea>
+      </details>
+      <div id="import-status" style="display:none;font-size:14px;padding:10px;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:10px">
+        <button id="import-cancel" style="flex:1;padding:12px;font-size:15px;border:1px solid #c8c2b0;background:#fbf9f2;cursor:pointer;font-family:inherit;font-weight:700;">キャンセル</button>
+        <button id="import-confirm" style="flex:1;padding:12px;font-size:15px;border:none;background:#21537f;color:#fff;cursor:pointer;font-family:inherit;font-weight:700;">取り込む</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="amida-flash.js"></script>
+<script>
+// デッキは amida-flash.js（学習アプリの単語カード41枚から作った手元専用のデッキ）が window.AMIDA_PRIVATE_DECKS に入れる
+const decks = Object.assign({}, window.AMIDA_PRIVATE_DECKS || {});
+if(!Object.keys(decks).length){ document.getElementById('no-deck').style.display='block'; }
+
+
+// ===== ロジック =====
+// 定着ルール: 間違えた問題は3回連続で正解するまでキューに残す。
+// 進捗はlocalStorageに保存し、次回開いたときも「まだ覚えてない問題」を覚えておく。
+const MASTER_NEED = 3;          // 間違えた問題が定着するのに必要な連続正解数
+const STORE_KEY = 'aib_amida_need_v1';
+const EVER_KEY = 'aib_amida_everwrong_v1';  // 一度でも間違えたカードを永久記録（定着しても消さない）
+const SEEN_KEY = 'aib_amida_seen_v1';       // 一度でも解いたカードを記録（未着手判定用・デッキID→[質問文]）
+
+// ----- 一度でも間違えたカードの永久記録（デッキID→[質問文,...]） -----
+function loadEver(){
+  try { return JSON.parse(localStorage.getItem(EVER_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveEver(o){
+  try { localStorage.setItem(EVER_KEY, JSON.stringify(o)); } catch(e){}
+}
+// 間違えたカードを永久記録に追加（deckIdは現在のデッキ、sは質問文）
+function recordEverWrong(deckId, sText){
+  const ev = loadEver();
+  if(!ev[deckId]) ev[deckId] = [];
+  if(!ev[deckId].includes(sText)) ev[deckId].push(sText);
+  saveEver(ev);
+}
+// 全デッキ横断で「一度でも間違えたカード」を集めて配列で返す（重複除去）
+function collectEverWrongCards(){
+  const ev = loadEver();
+  const out = [];
+  const seen = new Set();
+  Object.entries(ev).forEach(([deckId, list]) => {
+    const dk = decks[deckId];
+    if(!dk) return; // デッキ再編等でIDが変わった場合はスキップ
+    list.forEach(sText => {
+      const card = dk.cards.find(c => c.s === sText);
+      if(card && !seen.has(sText)){ seen.add(sText); out.push(card); }
+    });
+  });
+  return out;
+}
+function everWrongTotal(){
+  const ev = loadEver();
+  let n = 0;
+  Object.values(ev).forEach(list => n += list.length);
+  return n;
+}
+
+// ----- 解いたカードの記録（未着手＝まだやってない問題の判定用） -----
+function loadSeen(){
+  try { return JSON.parse(localStorage.getItem(SEEN_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveSeen(o){
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify(o)); } catch(e){}
+}
+function recordSeen(deckId, sText){
+  const sv = loadSeen();
+  if(!sv[deckId]) sv[deckId] = [];
+  if(!sv[deckId].includes(sText)) sv[deckId].push(sText);
+  saveSeen(sv);
+}
+// 全デッキ横断で「まだ一度も解いていないカード」を集める（元デッキIDを付与）
+function collectUnseenCards(){
+  const sv = loadSeen();
+  const ev = loadEver();   // 間違えた記録があるカードも「着手済み」とみなす（過去分の補完）
+  const out = [];
+  Object.entries(decks).forEach(([deckId, dk]) => {
+    const done = new Set([].concat(sv[deckId] || [], ev[deckId] || []));
+    dk.cards.forEach(c => {
+      if(!done.has(c.s)){ const cc = Object.assign({}, c); cc._deck = deckId; out.push(cc); }
+    });
+  });
+  return out;
+}
+function unseenTotal(){ return collectUnseenCards().length; }
+
+let current = null;
+let currentId = null;
+let queue = [];                 // まだ定着していないカードidxの待ち行列
+let needMap = {};               // カードidx → 定着までに必要な残り正解数（<=0で定着）
+let missed = new Set();         // 一度でも間違えたカードidx（保存対象）
+let history = [];               // 回答済み結果の履歴（解説の読み返し用・採点はしない）
+let reviewIdx = null;           // 履歴レビュー中の位置（null=ライブの問題中）
+
+const $ = id => document.getElementById(id);
+function showOnly(id){
+  ['top','quiz','result','score'].forEach(s => {
+    $(s).style.display = s === id ? 'flex' : 'none';
+  });
+  if(id==='top') $('top').style.display='block';
+}
+
+// ----- localStorage（まだ覚えてない問題を記憶） -----
+function loadStore(){
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveStore(store){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){}
+}
+// 現在のデッキの「未定着の間違え問題」を質問文(s)をキーに保存
+function persistNeed(){
+  const store = loadStore();
+  const obj = {};
+  current.cards.forEach((c,i) => {
+    if(missed.has(i) && needMap[i] > 0) obj[c.s] = needMap[i];
+  });
+  if(Object.keys(obj).length) store[currentId] = obj;
+  else delete store[currentId];
+  saveStore(store);
+}
+function pendingCount(id){
+  const o = loadStore()[id];
+  return o ? Object.keys(o).length : 0;
+}
+
+function renderDecks(){
+  const wrap = $('decks');
+  wrap.innerHTML = '';
+  // 「間違えたものモード」ボタン（全デッキ横断・永久記録）
+  const ewTotal = everWrongTotal();
+  const ew = document.createElement('button');
+  ew.className = 'deck';
+  ew.style.borderColor = '#bf3a2b';
+  ew.innerHTML = `間違えたものモード<span class="cnt">${ewTotal}問</span>` +
+    (ewTotal>0 ? `<span class="cnt" style="color:#bf3a2b">これまで間違えた全カード</span>` : `<span class="cnt">まだなし</span>`);
+  ew.onclick = () => { if(ewTotal>0) startDeck('__everwrong__'); };
+  wrap.appendChild(ew);
+  if(ewTotal>0){
+    const rst = document.createElement('button');
+    rst.className = 'deck'; rst.style.opacity='0.6'; rst.style.fontSize='14px';
+    rst.textContent = '間違え記録をリセット';
+    rst.onclick = () => { if(confirm('これまでの「間違えた記録」をすべて消しますか？')){ saveEver({}); renderDecks(); } };
+    wrap.appendChild(rst);
+  }
+  // まだやってない問題モード（全デッキ横断・未着手のみ）
+  const unTotal = unseenTotal();
+  const un = document.createElement('button');
+  un.className = 'deck';
+  un.style.borderColor = '#21537f';
+  un.innerHTML = `まだやってない問題（全セット横断）<span class="cnt">${unTotal}問</span>` +
+    (unTotal>0 ? `<span class="cnt" style="color:#21537f">未着手をまとめて出題</span>` : `<span class="cnt">全部やりました🎉</span>`);
+  un.onclick = () => { if(unTotal>0) startDeck('__unseen__'); };
+  wrap.appendChild(un);
+
+  Object.entries(decks).forEach(([id,d]) => {
+    const b = document.createElement('button');
+    b.className = 'deck';
+    const pend = pendingCount(id);
+    const badge = pend > 0 ? `<span class="cnt" style="color:#bf3a2b">まだ${pend}問</span>` : '';
+    b.innerHTML = `${d.name}<span class="cnt">${d.cards.length}問</span>${badge}`;
+    b.onclick = () => startDeck(id);
+    wrap.appendChild(b);
+  });
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// fresh=true なら保存済みの間違え記録を消してまっさらに始める
+function startEverWrongMode(){
+  const cards = collectEverWrongCards();
+  if(cards.length === 0){ alert('まだ間違えたカードがありません。'); return; }
+  // カードに元デッキIDを付与（間違えたら元デッキの記録へ反映するため）
+  const ev = loadEver();
+  const deckOf = {};
+  Object.entries(ev).forEach(([deckId, list]) => list.forEach(sT => { if(deckOf[sT]===undefined) deckOf[sT]=deckId; }));
+  cards.forEach(c => { c._deck = deckOf[c.s] || currentId; });
+  current = { name:'間違えたものモード', cards, _ever:true };
+  currentId = '__everwrong__';
+  needMap = {}; missed = new Set(); history = []; reviewIdx = null;
+  cards.forEach((c,i)=> needMap[i]=1);   // 復習は1回正解で一旦クリア（記録自体は永久に残る）
+  queue = shuffle(cards.map((_,i)=>i));
+  showQ();
+}
+
+function startUnseenMode(){
+  const cards = collectUnseenCards();   // 既に _deck 付き
+  if(cards.length === 0){ alert('未着手の問題はありません（全部やりました🎉）。'); return; }
+  current = { name:'まだやってない問題', cards, _unseen:true };
+  currentId = '__unseen__';
+  needMap = {}; missed = new Set(); history = []; reviewIdx = null;
+  cards.forEach((c,i)=> needMap[i]=1);   // 初見は1回正解で一旦クリア
+  queue = shuffle(cards.map((_,i)=>i));
+  showQ();
+}
+
+function startDeck(id, fresh){
+  if(id === '__everwrong__'){ startEverWrongMode(); return; }
+  if(id === '__unseen__'){ startUnseenMode(); return; }
+  current = decks[id];
+  currentId = id;
+  current._ever = false;
+  if(fresh){
+    const store = loadStore();
+    delete store[id];
+    saveStore(store);
+  }
+  const saved = loadStore()[id] || {};
+  needMap = {};
+  missed = new Set();
+  history = []; reviewIdx = null;
+  current.cards.forEach((c,i) => {
+    if(saved[c.s] > 0){ needMap[i] = saved[c.s]; missed.add(i); } // 前回の間違えを引き継ぐ
+    else { needMap[i] = 1; }                                      // 初見は1回正解で定着
+  });
+  queue = shuffle(current.cards.map((_,i)=>i));
+  showQ();
+}
+
+function masteredCount(){
+  return current.cards.reduce((n,_,i) => n + (needMap[i] <= 0 ? 1 : 0), 0);
+}
+
+function showQ(){
+  reviewIdx = null;                 // ライブ（今の問題）に戻る
+  if(queue.length === 0){ showScore(); return; }
+  const c = current.cards[queue[0]];
+  $('quiz-back').style.display = history.length > 0 ? 'inline-block' : 'none';
+  $('progress').textContent = `覚えた ${masteredCount()} / ${current.cards.length}　・　残り ${queue.length}`;
+  $('hstat').textContent = `覚えた ${masteredCount()}/${current.cards.length}`;
+  $('hbar').style.width = (masteredCount()/current.cards.length*100)+'%';
+  $('situation').textContent = c.s;
+  const wrap = $('choices');
+  wrap.innerHTML = '';
+  // 選択肢を動的に集める（2択でも3択でも対応）＋並びをシャッフル
+  const opts = shuffle(['a','b','c'].filter(key => c[key] != null));
+  opts.forEach(key => {
+    const b = document.createElement('button');
+    b.className = 'ch';
+    b.textContent = c[key];
+    b.onclick = () => answer(key);
+    wrap.appendChild(b);
+  });
+  showOnly('quiz');
+}
+
+function answer(picked){
+  const i = queue.shift();
+  const c = current.cards[i];
+  const ok = picked === c.ans;
+  // 記録先のデッキID（間違えたもの/まだやってないモードは元デッキ、通常は現在デッキ）
+  const deckId = (current._ever || current._unseen) ? c._deck : currentId;
+  recordSeen(deckId, c.s);                    // 解いた問題として記録（未着手判定用）
+  if(ok){
+    needMap[i]--;
+  } else {
+    needMap[i] = MASTER_NEED;   // 間違えたら3回連続正解が必要に
+    missed.add(i);
+    recordEverWrong(deckId, c.s);             // 間違えた問題として永久記録
+  }
+  // まだ定着していなければ待ち行列の後ろに戻す
+  if(needMap[i] > 0) queue.splice(Math.min(3, queue.length), 0, i);
+  persistNeed();
+
+  let head = ok ? '正解' : '不正解';
+  if(ok && needMap[i] <= 0) head = '正解、定着！';
+  else if(ok) head = `正解。あと${needMap[i]}回で定着`;
+  else head = `不正解。${MASTER_NEED}回連続で正解すると定着`;
+
+  // 結果を履歴に積む（あとで「前へ」で解説を読み返せる）
+  history.push({ icon: ok ? '◯' : '✕', head, cls: ok ? 'ok' : 'ng', card: c, picked });
+  renderResult(history.length - 1);
+}
+
+// 履歴上の結果を表示する（k=historyのインデックス）。読み返し専用で採点はしない。
+function renderResult(k){
+  reviewIdx = k;
+  const h = history[k];
+  const c = h.card, picked = h.picked;
+  $('res-icon').textContent = h.icon;
+  $('res-icon').className = 'res-icon ' + h.cls;
+  $('res-text').textContent = h.head;
+  $('res-text').className = 'res-text ' + h.cls;
+  // 選択肢を1つずつ改行して表示。正解は緑、選んだ誤答は赤。
+  const keys = ['a','b','c'].filter(kk => c[kk] != null);
+  $('res-choices').innerHTML = keys.map(kk => {
+    const isCorrect = kk === c.ans;
+    const isPicked = kk === picked;
+    let cls = 'res-opt', mark = '';
+    if(isCorrect){ cls += ' correct'; mark = '<span class="rmk" style="color:#2f7a4a">✓ 正解</span>'; }
+    else if(isPicked){ cls += ' picked-wrong'; mark = '<span class="rmk" style="color:#bf3a2b">✕ あなたの回答</span>'; }
+    return '<div class="'+cls+'">'+mark+c[kk]+'</div>';
+  }).join('');
+  $('res-why').innerHTML = '<b>解説：</b>' + c.why;
+  if(c.tip){ $('res-tip').innerHTML = '<b>◎ 覚え方：</b>' + c.tip; $('res-tip').style.display = 'block'; }
+  else { $('res-tip').style.display = 'none'; }
+  $('backbtn').disabled = (k <= 0);                                   // これ以上前がなければ無効
+  $('nextbtn').textContent = (k >= history.length - 1) ? '次へ →' : '次の解説 →';
+  showOnly('result');
+}
+
+// 「次へ」= 履歴を見ている途中なら新しい方向へ、最新まで来たら次の問題へ
+$('nextbtn').onclick = () => {
+  if(reviewIdx !== null && reviewIdx < history.length - 1) renderResult(reviewIdx + 1);
+  else { reviewIdx = null; showQ(); }
+};
+// 「前へ」= ひとつ古い解説へ戻る
+$('backbtn').onclick = () => {
+  if(reviewIdx !== null && reviewIdx > 0) renderResult(reviewIdx - 1);
+};
+// 問題画面から「前の問題の解説を見る」= 最新の結果を開く
+$('quiz-back').onclick = () => {
+  if(history.length > 0) renderResult(history.length - 1);
+};
+
+function showScore(){
+  const total = current.cards.length;
+  $('score-num').textContent = `${total} / ${total}`;
+  $('score-sub').textContent = '🎉 全部定着した！';
+  $('score-wrong').style.display = 'none';
+  showOnly('score');
+}
+
+$('score-retry').onclick = () => startDeck(currentId, true);   // まっさらにもう一度
+$('score-back').onclick = () => { renderDecks(); showOnly('top'); $('hstat').textContent=''; $('hbar').style.width='0'; };
+
+renderDecks();
+showOnly('top');
+
+// ─── Drill-Amida Weakness Integration: Core Utilities ───
+
+/**
+ * CATEGORY_DECK_MAP: ドリルのcat値 → AmidaデッキID のマッピング（AIB 4ドメイン）
+ */
+const CATEGORY_DECK_MAP = {
+  'D1 AI基礎・リテラシー':     'f1',
+  'D2 戦略・事業価値':         'f2',
+  'D3 ガバナンス・責任あるAI': 'f3',
+  'D4 レディネス・変革':       'f4'
+};
+const FALLBACK_DECK = 'f1';
+
+/**
+ * resolveDeck: catからデッキIDを決定する
+ * @param {string|null|undefined} cat - ドリル問題のカテゴリ
+ * @returns {string} 対応するAmidaデッキID、未マッピング時は'f1'
+ */
+function resolveDeck(cat) {
+  if (!cat) return FALLBACK_DECK;
+  return CATEGORY_DECK_MAP[cat] || FALLBACK_DECK;
+}
+
+/**
+ * extractWrongIds: ドリル進捗から間違いIDを収集する
+ * @param {string|object} source - 'local'ならlocalStorageから、
+ *                                  オブジェクトならJumonPayload（{ banks: { bankId: { wrong: {...} } } }）から収集
+ * @returns {Record<string, string[]>} { bankId: [questionId, ...], ... }
+ */
+function extractWrongIds(source) {
+  const BANKS = ['main', 'b2', 'c2', 'official', 'course', 'aif'];
+  const result = {};
+
+  if (source === 'local') {
+    BANKS.forEach(function(bankId) {
+      var key = 'aib_drill_progress_v1_' + bankId;
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        if (data && data.wrong && typeof data.wrong === 'object') {
+          var ids = Object.keys(data.wrong).filter(function(k) {
+            return data.wrong[k] === true;
+          });
+          if (ids.length > 0) result[bankId] = ids;
+        }
+      } catch (e) { /* skip invalid JSON or missing bank */ }
+    });
+  } else if (source && typeof source === 'object' && source.banks) {
+    Object.keys(source.banks).forEach(function(bankId) {
+      var bankData = source.banks[bankId];
+      if (bankData && bankData.wrong && typeof bankData.wrong === 'object') {
+        var ids = Object.keys(bankData.wrong).filter(function(k) {
+          return bankData.wrong[k] === true;
+        });
+        if (ids.length > 0) result[bankId] = ids;
+      }
+    });
+  }
+  return result;
+}
+
+/**
+ * conceptMatch: ドリル問題のcardsとAmidaデッキのカードを照合する
+ * @param {object} question - ドリルの問題オブジェクト（cardsフィールドを持つ）
+ * @param {string} deckId - マッピング先のAmidaデッキID
+ * @returns {Array} マッチしたAmidaカードの配列（空なら未マッチ）
+ */
+function conceptMatch(question, deckId) {
+  const deck = decks[deckId];
+  if (!deck || !question.cards || question.cards.length === 0) return [];
+  const matches = [];
+  const terms = question.cards.filter(function(t) { return t && t.length >= 2; });
+  if (terms.length === 0) return [];
+  deck.cards.forEach(function(card) {
+    // 状況文だけでなく選択肢も照合する（AIBの用語は選択肢の側に出ることが多い）
+    var sLower = [card.s, card.a, card.b, card.c].filter(Boolean).join(' ').toLowerCase();
+    for (var i = 0; i < terms.length; i++) {
+      if (sLower.includes(terms[i].toLowerCase())) {
+        matches.push(card);
+        break;
+      }
+    }
+  });
+  return matches;
+}
+
+/**
+ * decodeJumon: Jumon文字列をデコードする
+ * @param {string} jumonStr - "AIBv1:base64..." 形式の文字列
+ * @returns {{ banks: object }|null} デコード結果、または失敗時null
+ */
+function decodeJumon(jumonStr) {
+  var trimmed = (jumonStr || '').trim();
+  if (!trimmed.startsWith('AIBv1:')) return null;
+  try {
+    var b64 = trimmed.substring(6);
+    var json = decodeURIComponent(escape(atob(b64.replace(/\s+/g, ''))));
+    var data = JSON.parse(json);
+    // v2 format: { v:2, banks: {...}, amida: {...} }
+    if (data.banks && typeof data.banks === 'object') {
+      if (Object.keys(data.banks).length === 0) return null;
+      return { banks: data.banks };
+    }
+    // legacy v1 format: { seen: {...}, wrong: {...} }
+    if (data.wrong && typeof data.wrong === 'object') {
+      return { banks: { main: data } };
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * loadAllDrillQuestions: 各questions_*.jsファイルを読み込み、
+ * bankIdをキーとした問題データの辞書を返す。
+ * file://でも動くように<script>タグ方式を使用。
+ * @returns {Promise<Record<string, Array>>} bankId → DrillQuestion[] のマップ
+ */
+async function loadAllDrillQuestions() {
+  var files = {
+    main: 'questions.js',
+    b2: 'questions_b2.js',
+    c2: 'questions_c2.js',
+    official: 'questions_official.js',
+    course: 'questions_course.js',
+    aif: 'questions_aif.js'
+  };
+  var banks = {};
+  // scriptタグで順番に読み込み、グローバルQUESTIONSをコピーしていく
+  var origQ = (typeof QUESTIONS !== 'undefined') ? QUESTIONS : undefined;
+  for (var bankId of Object.keys(files)) {
+    try {
+      await new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = files[bankId];
+        s.onload = function() {
+          if (typeof QUESTIONS !== 'undefined' && Array.isArray(QUESTIONS)) {
+            banks[bankId] = QUESTIONS;
+          }
+          document.head.removeChild(s);
+          resolve();
+        };
+        s.onerror = function() {
+          document.head.removeChild(s);
+          resolve(); // skip unavailable
+        };
+        document.head.appendChild(s);
+      });
+    } catch (e) { /* skip */ }
+  }
+  // グローバルQUESTIONSを復元（もし他で使われている場合の安全策）
+  if (origQ !== undefined) { QUESTIONS = origQ; }
+  return banks;
+}
+
+/**
+ * runImportPipeline: ドリル弱点インポートの全体パイプラインを実行する
+ * @param {string|object} source - 'local' または JumonPayload
+ * @returns {Promise<{totalWrongIds:number, matchedCount:number, generatedCount:number, skippedDuplicates:number, affectedDecks:Set, errors:string[]}>}
+ */
+async function runImportPipeline(source) {
+  var result = {
+    totalWrongIds: 0,
+    matchedCount: 0,
+    generatedCount: 0,
+    skippedDuplicates: 0,
+    affectedDecks: new Set(),
+    errors: []
+  };
+
+  // Step 1: 問題データのロード
+  var allQuestions = await loadAllDrillQuestions();
+
+  // Step 2: Wrong IDの収集
+  var wrongIds = extractWrongIds(source);
+  Object.values(wrongIds).forEach(function(ids) { result.totalWrongIds += ids.length; });
+  if (result.totalWrongIds === 0) return result;
+
+  // Step 3: EverWrongレコードのロード
+  var ever = loadEver();
+
+  // Step 4: 各Wrong_IDを処理
+  Object.keys(wrongIds).forEach(function(bankId) {
+    var questions = allQuestions[bankId];
+    if (!questions) return;
+    wrongIds[bankId].forEach(function(qId) {
+      var question = questions.find(function(q) { return String(q.id) === String(qId); });
+      if (!question) return;
+
+      var deckId = resolveDeck(question.cat);
+      result.affectedDecks.add(deckId);
+
+      // Concept Match
+      var matches = conceptMatch(question, deckId);
+
+      if (matches.length > 0) {
+        // Match found → mark as everWrong
+        matches.forEach(function(card) {
+          if (!ever[deckId]) ever[deckId] = [];
+          if (!ever[deckId].includes(card.s)) {
+            ever[deckId].push(card.s);
+            result.matchedCount++;
+          }
+        });
+      }
+      // マッチなしの場合はスキップ（手書きカードで別途対応）
+    });
+  });
+
+  // Step 5: Persist
+  try {
+    saveEver(ever);
+  } catch (e) {
+    result.errors.push('aib_amida_everwrong_v1 の書き込みに失敗');
+  }
+
+  return result;
+}
+
+// ─── Import Tool UI Wiring ───
+(function() {
+  var btn = document.getElementById('import-btn');
+  var modal = document.getElementById('import-modal');
+  var confirmBtn = document.getElementById('import-confirm');
+  var cancelBtn = document.getElementById('import-cancel');
+  var statusEl = document.getElementById('import-status');
+  var jumonInput = document.getElementById('import-jumon');
+
+  if (btn) btn.onclick = function() {
+    modal.style.display = 'block';
+    statusEl.style.display = 'none';
+    if (jumonInput) jumonInput.value = '';
+  };
+
+  if (cancelBtn) cancelBtn.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  if (confirmBtn) confirmBtn.onclick = async function() {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = '⏳ 処理中…';
+    statusEl.style.display = 'none';
+
+    var source;
+    var jumonText = (jumonInput && jumonInput.value || '').trim();
+    if (jumonText) {
+      var decoded = decodeJumon(jumonText);
+      if (!decoded) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f6ebe8';
+        statusEl.style.color = '#bf3a2b';
+        statusEl.textContent = '❌ じゅもんの形式が無効です。AIBv1:... で始まるデータを貼り付けてください。';
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '取り込む';
+        return;
+      }
+      source = decoded;
+    } else {
+      source = 'local';
+    }
+
+    try {
+      var result = await runImportPipeline(source);
+      statusEl.style.display = 'block';
+      if (result.totalWrongIds === 0) {
+        statusEl.style.background = '#fffdf2';
+        statusEl.style.color = '#7a471a';
+        statusEl.textContent = 'ドリルに間違えた問題が見つかりませんでした。まずドリルで問題を解いてみましょう。';
+      } else {
+        var deckNames = [...result.affectedDecks].map(function(id) { return decks[id] ? decks[id].name : id; }).join('、');
+        var msg = '✅ 取り込み完了\n';
+        msg += '・間違い問題数: ' + result.totalWrongIds + '\n';
+        msg += '・間違えたものモードに追加: ' + result.matchedCount + '\n';
+        msg += '・対象デッキ: ' + deckNames;
+        if (result.errors.length > 0) msg += '\n⚠️ エラー: ' + result.errors.join(', ');
+        statusEl.style.background = '#edf2ea';
+        statusEl.style.color = '#183251';
+        statusEl.style.whiteSpace = 'pre-wrap';
+        statusEl.textContent = msg;
+        renderDecks();
+      }
+    } catch (e) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = '#f6ebe8';
+      statusEl.style.color = '#bf3a2b';
+      statusEl.textContent = '❌ エラーが発生しました: ' + e.message;
+    }
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '取り込む';
+  };
+})();
+
+</script>
+</body>
+</html>
